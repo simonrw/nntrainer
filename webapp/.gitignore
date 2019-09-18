@@ -1,0 +1,4 @@
+node_modules
+*.pyc
+elm-stuff
+static/js/bundle.js
