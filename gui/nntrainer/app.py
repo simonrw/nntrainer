@@ -64,6 +64,15 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
             show_error_dialog("Training dir is not set")
             return
 
+        # TODO: optionally get the input dimensions of the model
+        model_cls = ARCHITECTURES[str(self.architecture_choice.currentText())]
+        base_model = model_cls(include_weights=True, include_top=False)
+
+        model = Sequential()
+        model.add(base_model)
+
+        # TODO: include fully connected layers
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
