@@ -169,7 +169,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="trainButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -189,7 +189,7 @@
    <zorder>spinBox_2</zorder>
    <zorder>label_4</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>pushButton_2</zorder>
+   <zorder>trainButton</zorder>
    <zorder>horizontalSpacer</zorder>
    <zorder>chooseValidationDataButton</zorder>
    <zorder>chooseValidationDataLabel</zorder>

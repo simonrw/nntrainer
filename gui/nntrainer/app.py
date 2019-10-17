@@ -7,6 +7,14 @@ import os
 ARCHITECTURES = {"ResNet50": tf.keras.applications.ResNet50}
 
 
+def show_error_dialog(txt, icon=QtWidgets.QMessageBox.Critical):
+    msg = QtWidgets.QMessageBox()
+    msg.setIcon(QtWidgets.QMessageBox.Critical)
+    msg.setText(txt)
+    msg.setWindowTitle("Error")
+    msg.exec_()
+
+
 class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -22,6 +30,7 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         # Create connections
         self.chooseTrainingDataButton.clicked.connect(self.select_training_dir)
         self.chooseValidationDataButton.clicked.connect(self.select_validation_dir)
+        self.trainButton.clicked.connect(self.run_training)
 
     def setup_architecture_choices(self):
         self.architecture_choice.addItems(list(ARCHITECTURES.keys()))
@@ -49,6 +58,11 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
     def set_validation_dir(self, dirname):
         self.validation_dir = dirname
         self.chooseValidationDataLabel.setText(dirname)
+
+    def run_training(self):
+        if self.training_dir is None:
+            show_error_dialog("Training dir is not set")
+            return
 
 
 def main():
