@@ -50,14 +50,20 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QPushButton" name="chooseTrainingData">
+       <widget class="QPushButton" name="chooseTrainingDataButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Choose training data directory...</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="chooseTrainingDataLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -80,14 +86,20 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
-       <widget class="QPushButton" name="chooseValidationData">
+       <widget class="QPushButton" name="chooseValidationDataButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>Choose validation data directory...</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="chooseValidationDataLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -179,8 +191,8 @@
    <zorder>layoutWidget</zorder>
    <zorder>pushButton_2</zorder>
    <zorder>horizontalSpacer</zorder>
-   <zorder>chooseValidationData</zorder>
-   <zorder>label_5</zorder>
+   <zorder>chooseValidationDataButton</zorder>
+   <zorder>chooseValidationDataLabel</zorder>
    <zorder>label_4</zorder>
    <zorder>verticalSpacer</zorder>
   </widget>
