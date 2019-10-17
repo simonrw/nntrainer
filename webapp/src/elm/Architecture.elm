@@ -1,4 +1,4 @@
-module Architecture exposing (Architecture, decodeArchitectures, fromString)
+module Architecture exposing (Architecture, decodeArchitectures, fromString, name)
 
 import Json.Decode as D
 
@@ -20,3 +20,8 @@ decodeArchitectures =
 decodeArchitecture : D.Decoder Architecture
 decodeArchitecture =
     D.map fromString D.string
+
+
+name : Architecture -> String
+name (Architecture arch) =
+    arch

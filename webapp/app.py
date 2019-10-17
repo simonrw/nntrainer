@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 
 app = Flask("nntrainer")
 
@@ -10,3 +10,9 @@ def index():
 @app.route("/api/architectures")
 def api_architectures():
     return jsonify(["ResNet50", "VGG16"])
+
+@app.route("/api/upload", methods=["POST"])
+def api_upload_file():
+    zipfile = request.files["file"]
+    print(zipfile)
+    return "ok"
