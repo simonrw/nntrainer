@@ -10,6 +10,7 @@ N_FC = 3
 FC_DIM = 256
 OPTIMISER = "Adam"
 LOSS_FUNCTION = "categorical_crossentropy"
+BATCH_SIZE = 32
 
 
 @pytest.fixture(scope="session")
@@ -47,6 +48,11 @@ def model(trainer):
     return trainer.build_model()
 
 
+@pytest.fixture(scope="session")
+def datagen(trainer):
+    return trainer.build_datagen(training_dir)
+
+
 def test_build_model(model):
     assert model is not None
 
@@ -61,3 +67,19 @@ def test_first_layer_dimensions(model):
 def test_last_layer_dimensions(model):
     last_layer = model.layers[-1]
     assert last_layer.output_shape == (None, CLASSES)
+
+
+def test_preprocess_function(trainer):
+    fns = {
+        tf.keras.applications.ResNet50: tf.keras.applications.resnet50.preprocess_input,
+        tf.keras.applications.VGG16: tf.keras.applications.vgg16.preprocess_input,
+    }
+    fn = fns[trainer.model_cls]
+    assert trainer.preprocess_input_fn() is fn
+
+
+@pytest.mark.skip
+def test_building_datagen(datagen):
+    batch, labels = next(datagen)
+    assert batch.shape[0] == labels.shape[0] == BATCH_SIZE
+    assert batch[0].shape == INPUT_SHAPE

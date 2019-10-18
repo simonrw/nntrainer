@@ -122,6 +122,7 @@ class ModelTrainer(object):
 
     def run(self):
         model = self.build_model()
+        training_datagen = self.build_datagen(self.training_dir)
 
         print("Finished training")
 
@@ -163,6 +164,22 @@ class ModelTrainer(object):
         )
 
         return model
+
+    def build_datagen(self, training_dir):
+        gen = tf.keras.preprocessing.image.InputDataGenerator(
+            preprocessing_function=self.preprocess_input_fn()
+        )
+
+    def preprocess_input_fn(self):
+        """Returns the correct function for preprocessing the data, based on the
+        architecture that has been selected
+        """
+        fns = {
+            tf.keras.applications.ResNet50: tf.keras.applications.resnet50.preprocess_input,
+            tf.keras.applications.VGG16: tf.keras.applications.vgg16.preprocess_input,
+        }
+
+        return fns[self.model_cls]
 
 
 def main():
