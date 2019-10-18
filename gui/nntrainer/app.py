@@ -7,6 +7,8 @@ from tensorflow.keras.layers import Dense, Flatten
 import os
 
 ARCHITECTURES = {"ResNet50": tf.keras.applications.ResNet50}
+LOSS_FUNCTIONS = ["categorical_crossentropy"]
+OPTIMISERS = ["Adam", "SGD"]
 
 
 def show_error_dialog(txt, icon=QtWidgets.QMessageBox.Critical):
@@ -28,6 +30,8 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
 
         # Perform initial setup
         self.setup_architecture_choices()
+        self.setup_loss_choices()
+        self.setup_optimiser_choices()
 
         # Create connections
         self.chooseTrainingDataButton.clicked.connect(self.select_training_dir)
@@ -37,6 +41,12 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
 
     def setup_architecture_choices(self):
         self.architecture_choice.addItems(list(ARCHITECTURES.keys()))
+
+    def setup_loss_choices(self):
+        self.lossSelector.addItems(LOSS_FUNCTIONS)
+
+    def setup_optimiser_choices(self):
+        self.optimiserSelector.addItems(OPTIMISERS)
 
     def select_training_dir(self):
         options = QtWidgets.QFileDialog.Options()
@@ -95,6 +105,8 @@ class ModelTrainer(object):
         model_cls,
         n_fc,
         fc_dim,
+        optimiser,
+        loss_function,
         input_shape,
         classes
     ):
@@ -103,6 +115,8 @@ class ModelTrainer(object):
         self.model_cls = model_cls
         self.n_fc = n_fc
         self.fc_dim = fc_dim
+        self.optimiser = optimiser
+        self.loss_function = loss_function
         self.input_shape = input_shape
         self.classes = classes
 
@@ -112,8 +126,11 @@ class ModelTrainer(object):
         print("Finished training")
 
     def build_model(self):
-        # TODO: optionally get the input dimensions of the model
+        # Create the custom first layer, which has the dimensions of the data
         input_tensor = tf.keras.layers.Input(shape=self.input_shape)
+
+        # This is the base model class from the architecture that the user specified. We
+        # constrain the solution to pre-trained models using imagenet weights.
         base_model = self.model_cls(
             weights="imagenet",
             include_top=False,
@@ -121,21 +138,28 @@ class ModelTrainer(object):
             classes=self.classes,
         )
 
+        # The final model
         model = Sequential()
+
+        # Add the base model, i.e. the model that has already been trained using
+        # ImageNet, minus the first few layers (as we asked for `include_top=False`).
         model.add(base_model)
 
+        # Flatten the output of the feature extractor before adding the fully connected
+        # layers.
         model.add(Flatten())
 
-        # TODO: include fully connected layers
+        # Add the fully connected layers
         for layer_idx in range(self.n_fc):
             model.add(Dense(self.fc_dim, activation="relu"))
 
+        # Add the final classification layer
         model.add(Dense(self.classes, activation="softmax"))
 
-        # TODO: optimizer should be input
-        # TODO: loss function should be input
+        # The model is complete, so compile it using the optimiser and loss functions
+        # specified
         model.compile(
-            optimizer="adam", metrics=["accuracy"], loss="categorical_crossentropy"
+            optimizer=self.optimiser, metrics=["accuracy"], loss=self.loss_function
         )
 
         return model
