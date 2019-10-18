@@ -4,14 +4,12 @@ from nntrainer.app import ModelTrainer
 import tensorflow as tf
 
 
-@pytest.fixture(scope="session")
-def input_shape():
-    return (560, 224, 3)
-
-
-@pytest.fixture(scope="session")
-def classes():
-    return 15
+CLASSES = 15
+INPUT_SHAPE = (560, 224, 3)
+N_FC = 3
+FC_DIM = 256
+OPTIMISER = "Adam"
+LOSS_FUNCTION = "categorical_crossentropy"
 
 
 @pytest.fixture(scope="session")
@@ -30,27 +28,17 @@ def model_cls(request):
 
 
 @pytest.fixture(scope="session")
-def n_fc():
-    return 3
-
-
-@pytest.fixture(scope="session")
-def fc_dim():
-    return 256
-
-
-@pytest.fixture(scope="session")
-def trainer(
-    training_dir, validation_dir, model_cls, n_fc, fc_dim, input_shape, classes
-):
+def trainer(training_dir, validation_dir, model_cls):
     return ModelTrainer(
         training_dir=training_dir,
         validation_dir=validation_dir,
         model_cls=model_cls,
-        n_fc=n_fc,
-        fc_dim=fc_dim,
-        input_shape=input_shape,
-        classes=classes,
+        n_fc=N_FC,
+        fc_dim=FC_DIM,
+        optimiser=OPTIMISER,
+        loss_function=LOSS_FUNCTION,
+        input_shape=INPUT_SHAPE,
+        classes=CLASSES,
     )
 
 
@@ -63,13 +51,13 @@ def test_build_model(model):
     assert model is not None
 
 
-def test_first_layer_dimensions(model, input_shape):
+def test_first_layer_dimensions(model):
     first_layer = model.layers[0].layers[0]
     assert first_layer.input_shape == [
-        (None, input_shape[0], input_shape[1], input_shape[2])
+        (None, INPUT_SHAPE[0], INPUT_SHAPE[1], INPUT_SHAPE[2])
     ]
 
 
-def test_last_layer_dimensions(model, classes):
+def test_last_layer_dimensions(model):
     last_layer = model.layers[-1]
-    assert last_layer.output_shape == (None, classes)
+    assert last_layer.output_shape == (None, CLASSES)
