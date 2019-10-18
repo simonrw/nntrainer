@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NNTrainer</class>
- <widget class="QMainWindow" name="NNTrainer">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
-    <height>427</height>
+    <width>500</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>NN Trainer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -171,7 +171,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Number of fully connected layers</string>
+           <string>Fully connected layers</string>
           </property>
          </widget>
         </item>
@@ -205,6 +205,13 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
+       <widget class="QPushButton" name="quitButton">
+        <property name="text">
+         <string>Quit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -233,21 +240,7 @@
      </layout>
     </item>
    </layout>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>spinBox_2</zorder>
-   <zorder>label_4</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>trainButton</zorder>
-   <zorder>horizontalSpacer</zorder>
-   <zorder>chooseValidationDataButton</zorder>
-   <zorder>chooseValidationDataLabel</zorder>
-   <zorder>label_4</zorder>
    <zorder>verticalSpacer</zorder>
-   <zorder>label_3</zorder>
-   <zorder>label_5</zorder>
-   <zorder>fcShape</zorder>
-   <zorder>fcLayers</zorder>
   </widget>
  </widget>
  <resources/>

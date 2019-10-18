@@ -31,6 +31,7 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         self.chooseTrainingDataButton.clicked.connect(self.select_training_dir)
         self.chooseValidationDataButton.clicked.connect(self.select_validation_dir)
         self.trainButton.clicked.connect(self.run_training)
+        self.quitButton.clicked.connect(self.quit)
 
     def setup_architecture_choices(self):
         self.architecture_choice.addItems(list(ARCHITECTURES.keys()))
@@ -58,6 +59,9 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
     def set_validation_dir(self, dirname):
         self.validation_dir = dirname
         self.chooseValidationDataLabel.setText(dirname)
+
+    def quit(self):
+        QtWidgets.QApplication.quit()
 
     def run_training(self):
         if self.training_dir is None:
