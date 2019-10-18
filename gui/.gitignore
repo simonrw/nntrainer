@@ -1,2 +1,3 @@
 build
 nntrainer_gui/nntrainer_ui.py
+nntrainer/gui/nntrainer_ui.py
