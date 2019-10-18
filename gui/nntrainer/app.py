@@ -3,6 +3,7 @@ from .gui import nntrainer_ui as ui
 from PyQt5 import QtWidgets, QtGui
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
 import os
 
 ARCHITECTURES = {"ResNet50": tf.keras.applications.ResNet50}
@@ -86,10 +87,24 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
 
 
 class ModelTrainer(object):
-    def __init__(self, training_dir, validation_dir, model_cls):
+    def __init__(
+        self,
+        *,
+        training_dir,
+        validation_dir,
+        model_cls,
+        n_fc,
+        fc_dim,
+        input_shape,
+        classes
+    ):
         self.training_dir = training_dir
         self.validation_dir = validation_dir
         self.model_cls = model_cls
+        self.n_fc = n_fc
+        self.fc_dim = fc_dim
+        self.input_shape = input_shape
+        self.classes = classes
 
     def run(self):
         model = self.build_model()
@@ -98,12 +113,30 @@ class ModelTrainer(object):
 
     def build_model(self):
         # TODO: optionally get the input dimensions of the model
-        base_model = self.model_cls(weights="imagenet", include_top=False)
+        input_tensor = tf.keras.layers.Input(shape=self.input_shape)
+        base_model = self.model_cls(
+            weights="imagenet",
+            include_top=False,
+            input_tensor=input_tensor,
+            classes=self.classes,
+        )
 
         model = Sequential()
         model.add(base_model)
 
+        model.add(Flatten())
+
         # TODO: include fully connected layers
+        for layer_idx in range(self.n_fc):
+            model.add(Dense(self.fc_dim, activation="relu"))
+
+        model.add(Dense(self.classes, activation="softmax"))
+
+        # TODO: optimizer should be input
+        # TODO: loss function should be input
+        model.compile(
+            optimizer="adam", metrics=["accuracy"], loss="categorical_crossentropy"
+        )
 
         return model
 
