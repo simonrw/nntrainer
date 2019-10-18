@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>400</height>
+    <width>603</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -197,10 +197,34 @@
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>104</height>
+        <height>117</height>
        </size>
       </property>
      </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_11">
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="augmentationConfigurationButton">
+        <property name="text">
+         <string>Configure augmentation</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -255,7 +279,7 @@
       <property name="sizeHint" stdset="0">
        <size>
         <width>20</width>
-        <height>8</height>
+        <height>117</height>
        </size>
       </property>
      </spacer>
@@ -298,13 +322,6 @@
      </layout>
     </item>
    </layout>
-   <zorder>verticalSpacer</zorder>
-   <zorder>verticalSpacer_2</zorder>
-   <zorder>optimiserSelector</zorder>
-   <zorder>label_6</zorder>
-   <zorder>label_7</zorder>
-   <zorder>lossSelector</zorder>
-   <zorder>horizontalSpacer_2</zorder>
   </widget>
  </widget>
  <resources/>

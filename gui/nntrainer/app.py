@@ -1,10 +1,12 @@
 import sys
-from .gui import nntrainer_ui as ui
+from .gui import nntrainer_ui, nntrainer_augmentation
 from PyQt5 import QtWidgets, QtGui
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten
 import os
+from typing import NamedTuple, Any, Union, Tuple, List, Optional
+from dataclasses import dataclass
 
 ARCHITECTURES = {"ResNet50": tf.keras.applications.ResNet50}
 LOSS_FUNCTIONS = ["categorical_crossentropy"]
@@ -19,7 +21,30 @@ def show_error_dialog(txt, icon=QtWidgets.QMessageBox.Critical):
     msg.exec_()
 
 
-class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
+@dataclass
+class AugmentationConfig(object):
+    rotation_range: int
+    width_shift_range: Any
+    height_shift_range: Any
+    brightness_range: List[float]
+    zoom_range: Union[float, Tuple[float]]
+    horizontal_flip: bool
+    vertical_flip: bool
+
+    @classmethod
+    def blank(cls):
+        return cls(
+                rotation_range=None,
+                width_shift_range=None,
+                height_shift_range=None,
+                brightness_range=None,
+                zoom_range=None,
+                horizontal_flip=None,
+                vertical_flip=None
+                )
+
+
+class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -27,6 +52,7 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         # Variables
         self.training_dir = None
         self.validation_dir = None
+        self.augmentation_config: AugmentationConfig = AugmentationConfig.blank()
 
         # Perform initial setup
         self.setup_architecture_choices()
@@ -38,6 +64,9 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         self.chooseValidationDataButton.clicked.connect(self.select_validation_dir)
         self.trainButton.clicked.connect(self.run_training)
         self.quitButton.clicked.connect(self.quit)
+        self.augmentationConfigurationButton.clicked.connect(
+            self.configure_augmentation
+        )
 
     def setup_architecture_choices(self):
         self.architecture_choice.addItems(list(ARCHITECTURES.keys()))
@@ -72,6 +101,11 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         self.validation_dir = dirname
         self.chooseValidationDataLabel.setText(dirname)
 
+    def configure_augmentation(self):
+        augmentation_config = NNTrainerAugmentation.get_params(parent=self)
+        if augmentation_config is not None:
+            self.augmentation_config = augmentation_config
+
     def quit(self):
         QtWidgets.QApplication.quit()
 
@@ -94,6 +128,32 @@ class NNTrainerApplication(QtWidgets.QMainWindow, ui.Ui_MainWindow):
         except Exception as e:
             # General error handler, show the message to the user
             show_error_dialog(str(e))
+
+
+class NNTrainerAugmentation(QtWidgets.QDialog, nntrainer_augmentation.Ui_Dialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+
+    @classmethod
+    def get_params(cls, parent=None) -> AugmentationConfig:
+        self = cls(parent)
+        result = self.exec_()
+
+        if result == QtWidgets.QDialog.Accepted:
+            return AugmentationConfig(
+                    rotation_range=self.rotationSelector.value(),
+                    width_shift_range=self.widthSelector.value(),
+                    height_shift_range=self.heightSelector.value(),
+                    brightness_range=(self.brightnessMinSelector.value(),
+                        self.brightnessMaxSelector.value()),
+                    zoom_range=(
+                        self.zoomMinSelector.value(),
+                        self.zoomMaxSelector.value(),
+                        ),
+                    horizontal_flip=self.horizontalFlipCheck.checkState() == 1,
+                    vertical_flip=self.verticalFlipCheck.checkState() == 1,
+                    )
 
 
 class ModelTrainer(object):
