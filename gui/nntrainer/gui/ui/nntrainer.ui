@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="tabBarAutoHide">
        <bool>false</bool>
@@ -79,7 +79,17 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="numFCLayers"/>
+             <widget class="QSpinBox" name="numFCLayers">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+              <property name="value">
+               <number>3</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -93,7 +103,17 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="numFCNeurones"/>
+             <widget class="QSpinBox" name="numFCNeurones">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+              <property name="value">
+               <number>1024</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -131,6 +151,19 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QPushButton" name="trainingDirButton">
               <property name="text">
                <string>Browse</string>
@@ -154,6 +187,19 @@
                <string>Validation directory</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
             <item>
              <widget class="QPushButton" name="validationDirButton">
@@ -416,7 +462,7 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_16">
             <item>
-             <widget class="QCheckBox" name="horizontalFilpCheck">
+             <widget class="QCheckBox" name="horizontalFlipCheck">
               <property name="text">
                <string>Horizontal Flip</string>
               </property>
