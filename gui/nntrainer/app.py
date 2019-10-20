@@ -34,14 +34,14 @@ class AugmentationConfig(object):
     @classmethod
     def blank(cls):
         return cls(
-                rotation_range=None,
-                width_shift_range=None,
-                height_shift_range=None,
-                brightness_range=None,
-                zoom_range=None,
-                horizontal_flip=None,
-                vertical_flip=None
-                )
+            rotation_range=None,
+            width_shift_range=None,
+            height_shift_range=None,
+            brightness_range=None,
+            zoom_range=None,
+            horizontal_flip=None,
+            vertical_flip=None,
+        )
 
 
 class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
@@ -49,27 +49,21 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
 
-        # Variables
-        self.training_dir = None
-        self.validation_dir = None
-        self.augmentation_config: AugmentationConfig = AugmentationConfig.blank()
-
         # Perform initial setup
         self.setup_architecture_choices()
         self.setup_loss_choices()
         self.setup_optimiser_choices()
 
-        # Create connections
-        self.chooseTrainingDataButton.clicked.connect(self.select_training_dir)
-        self.chooseValidationDataButton.clicked.connect(self.select_validation_dir)
-        self.trainButton.clicked.connect(self.run_training)
-        self.quitButton.clicked.connect(self.quit)
-        self.augmentationConfigurationButton.clicked.connect(
-            self.configure_augmentation
-        )
+        # Set up connections
+        self.quitButton.clicked.connect(lambda self: QtWidgets.QApplication.quit())
+        self.earlyStoppingEnable.toggled.connect(self.enable_disable_early_stopping)
+
+    def enable_disable_early_stopping(self, checked):
+        self.patienceValue.setEnabled(checked)
+        self.minDeltaValue.setEnabled(checked)
 
     def setup_architecture_choices(self):
-        self.architecture_choice.addItems(list(ARCHITECTURES.keys()))
+        self.architectureSelector.addItems(list(ARCHITECTURES.keys()))
 
     def setup_loss_choices(self):
         self.lossSelector.addItems(LOSS_FUNCTIONS)
@@ -106,28 +100,8 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
         if augmentation_config is not None:
             self.augmentation_config = augmentation_config
 
-    def quit(self):
-        QtWidgets.QApplication.quit()
-
     def run_training(self):
-        try:
-            if self.training_dir is None:
-                show_error_dialog("Training dir is not set")
-                return
-
-            model_cls = ARCHITECTURES[str(self.architecture_choice.currentText())]
-
-            trainer = ModelTrainer(
-                training_dir=self.training_dir,
-                validation_dir=self.validation_dir,
-                model_cls=model_cls,
-            )
-
-            trainer.run()
-
-        except Exception as e:
-            # General error handler, show the message to the user
-            show_error_dialog(str(e))
+        pass
 
 
 class NNTrainerAugmentation(QtWidgets.QDialog, nntrainer_augmentation.Ui_Dialog):
@@ -142,18 +116,17 @@ class NNTrainerAugmentation(QtWidgets.QDialog, nntrainer_augmentation.Ui_Dialog)
 
         if result == QtWidgets.QDialog.Accepted:
             return AugmentationConfig(
-                    rotation_range=self.rotationSelector.value(),
-                    width_shift_range=self.widthSelector.value(),
-                    height_shift_range=self.heightSelector.value(),
-                    brightness_range=(self.brightnessMinSelector.value(),
-                        self.brightnessMaxSelector.value()),
-                    zoom_range=(
-                        self.zoomMinSelector.value(),
-                        self.zoomMaxSelector.value(),
-                        ),
-                    horizontal_flip=self.horizontalFlipCheck.checkState() == 1,
-                    vertical_flip=self.verticalFlipCheck.checkState() == 1,
-                    )
+                rotation_range=self.rotationSelector.value(),
+                width_shift_range=self.widthSelector.value(),
+                height_shift_range=self.heightSelector.value(),
+                brightness_range=(
+                    self.brightnessMinSelector.value(),
+                    self.brightnessMaxSelector.value(),
+                ),
+                zoom_range=(self.zoomMinSelector.value(), self.zoomMaxSelector.value()),
+                horizontal_flip=self.horizontalFlipCheck.checkState() == 1,
+                vertical_flip=self.verticalFlipCheck.checkState() == 1,
+            )
 
 
 class ModelTrainer(object):
