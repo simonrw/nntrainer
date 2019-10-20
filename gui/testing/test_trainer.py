@@ -1,11 +1,11 @@
 import pytest
 from unittest import mock
-from nntrainer.app import ModelTrainer
+from nntrainer.app import ModelTrainer, TrainingOptions
 import tensorflow as tf
 
 
 CLASSES = 15
-INPUT_SHAPE = (560, 224, 3)
+INPUT_SHAPE = (560, 224)
 N_FC = 3
 FC_DIM = 256
 OPTIMISER = "Adam"
@@ -13,34 +13,37 @@ LOSS_FUNCTION = "categorical_crossentropy"
 BATCH_SIZE = 32
 
 
-@pytest.fixture(scope="session")
-def training_dir():
-    return "/"
-
-
-@pytest.fixture(scope="session")
-def validation_dir():
-    return "/"
-
-
 @pytest.fixture(scope="session", params=["ResNet50", "VGG16"])
-def model_cls(request):
-    return getattr(tf.keras.applications, request.param)
+def opts(request):
+    opts = TrainingOptions()
+    opts.architecture = request.param
+    opts.image_shape = INPUT_SHAPE
+    opts.num_fc_layers = N_FC
+    opts.fc_neurones = FC_DIM
+    opts.optimiser = OPTIMISER
+    opts.loss_function = LOSS_FUNCTION
+    opts.output_classes = CLASSES
+    return opts
+
+
+# @pytest.fixture(scope="session")
+# def training_dir():
+#     return "/"
+
+
+# @pytest.fixture(scope="session")
+# def validation_dir():
+#     return "/"
+
+
+# @pytest.fixture(scope="session", params=["ResNet50", "VGG16"])
+# def model_cls(request):
+#     return getattr(tf.keras.applications, request.param)
 
 
 @pytest.fixture(scope="session")
-def trainer(training_dir, validation_dir, model_cls):
-    return ModelTrainer(
-        training_dir=training_dir,
-        validation_dir=validation_dir,
-        model_cls=model_cls,
-        n_fc=N_FC,
-        fc_dim=FC_DIM,
-        optimiser=OPTIMISER,
-        loss_function=LOSS_FUNCTION,
-        input_shape=INPUT_SHAPE,
-        classes=CLASSES,
-    )
+def trainer(opts):
+    return ModelTrainer(opts)
 
 
 @pytest.fixture(scope="session")
@@ -60,7 +63,7 @@ def test_build_model(model):
 def test_first_layer_dimensions(model):
     first_layer = model.layers[0].layers[0]
     assert first_layer.input_shape == [
-        (None, INPUT_SHAPE[0], INPUT_SHAPE[1], INPUT_SHAPE[2])
+        (None, INPUT_SHAPE[0], INPUT_SHAPE[1], 3)
     ]
 
 

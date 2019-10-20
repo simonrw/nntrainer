@@ -8,7 +8,10 @@ import os
 from typing import NamedTuple, Any, Union, Tuple, List, Optional
 from dataclasses import dataclass
 
-ARCHITECTURES = {"ResNet50": tf.keras.applications.ResNet50}
+ARCHITECTURES = {
+    "ResNet50": tf.keras.applications.ResNet50,
+    "VGG16": tf.keras.applications.VGG16,
+}
 LOSS_FUNCTIONS = ["categorical_crossentropy"]
 OPTIMISERS = ["Adam", "SGD"]
 
@@ -245,7 +248,9 @@ class ModelTrainer(object):
         # The model is complete, so compile it using the optimiser and loss functions
         # specified
         model.compile(
-            optimizer=self.opts.optimiser, metrics=["accuracy"], loss=self.opts.loss_function
+            optimizer=self.opts.optimiser,
+            metrics=["accuracy"],
+            loss=self.opts.loss_function,
         )
 
         return model
