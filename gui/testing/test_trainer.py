@@ -24,6 +24,7 @@ def opts(request):
     opts.optimiser = OPTIMISER
     opts.loss_function = LOSS_FUNCTION
     opts.output_classes = CLASSES
+    opts.batch_size = BATCH_SIZE
     return opts
 
 

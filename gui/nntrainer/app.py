@@ -121,6 +121,7 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
             validation_errors.append("Validation directory does not exist")
 
         opts.image_shape = (self.imageDimX.value(), self.imageDimY.value())
+        opts.batch_size = self.batchSizeSelector.value()
 
         opts.training_epochs = self.epochsValue.value()
         opts.optimiser = self.optimiserSelector.currentText()

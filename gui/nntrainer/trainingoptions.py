@@ -17,6 +17,7 @@ class TrainingOptions:
     fc_neurones: Optional[int] = None
 
     # Training
+    batch_size: Optional[int] = None
     training_dir: Optional[str] = None
     validation_dir: Optional[str] = None
     image_shape: Optional[Tuple[int, int]] = None

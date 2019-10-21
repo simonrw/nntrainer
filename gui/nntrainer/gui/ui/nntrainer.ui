@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="tabBarAutoHide">
        <bool>false</bool>
@@ -138,7 +138,7 @@
        <attribute name="title">
         <string>Training</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_31">
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
@@ -273,6 +273,30 @@
                </widget>
               </item>
              </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Batch size</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="batchSizeSelector">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9999</number>
+              </property>
+              <property name="value">
+               <number>32</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
