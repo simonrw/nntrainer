@@ -123,3 +123,7 @@ def test_building_dataflow(training_dataflow):
     batch, labels = next(training_dataflow)
     assert batch.shape[0] == labels.shape[0] == BATCH_SIZE
     assert batch[0].shape == (INPUT_SHAPE[0], INPUT_SHAPE[1], 3)
+
+
+def test_run(trainer):
+    trainer.run()

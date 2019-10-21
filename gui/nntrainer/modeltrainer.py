@@ -18,11 +18,14 @@ class ModelTrainer(object):
     def run(self):
         model = self.build_model()
 
-        training_datagen = self.build_datagen(self.opts.training_dir)
+        training_datagen = self.build_datagen(validation=False)
+        training_dataflow = self.build_dataflow(training_datagen, validation=False)
+
         if self.opts.validation_dir:
-            validation_datagen = self.build_datagen(self.opts.validation_dir)
+            validation_datagen = self.build_datagen(validation=True)
+            validation_dataflow = self.build_dataflow(validation_datagen, validation=True)
         else:
-            validation_datagen = None
+            validation_dataflow = None
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
