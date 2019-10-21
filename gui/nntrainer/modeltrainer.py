@@ -6,15 +6,23 @@ from .trainingoptions import TrainingOptions
 from .architectures import ARCHITECTURES
 
 
+class TrainerError(Exception):
+    def __init__(self, msg):
+        super().__init__(msg)
+
+
 class ModelTrainer(object):
     def __init__(self, opts: TrainingOptions):
         self.opts = opts
 
     def run(self):
         model = self.build_model()
-        training_datagen = self.build_datagen(self.opts.training_dir)
 
-        print("Finished training")
+        training_datagen = self.build_datagen(self.opts.training_dir)
+        if self.opts.validation_dir:
+            validation_datagen = self.build_datagen(self.opts.validation_dir)
+        else:
+            validation_datagen = None
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
@@ -58,10 +66,38 @@ class ModelTrainer(object):
 
         return model
 
-    def build_datagen(self, training_dir):
-        gen = tf.keras.preprocessing.image.ImageDataGenerator(
-            preprocessing_function=self.preprocess_input_fn()
-        )
+    def build_datagen(self, validation=False):
+        if validation:
+            gen = tf.keras.preprocessing.image.ImageDataGenerator(
+                preprocessing_function=self.preprocess_input_fn()
+            )
+        else:
+            gen = tf.keras.preprocessing.image.ImageDataGenerator(
+                preprocessing_function=self.preprocess_input_fn(),
+                horizontal_flip=self.opts.horizontal_flip,
+                vertical_flip=self.opts.vertical_flip,
+                rotation_range=self.opts.rotation_angle,
+            )
+
+        return gen
+
+    def build_dataflow(self, datagen, validation=False):
+        if validation:
+            if self.opts.validation_dir is None:
+                raise TrainerError("validation directory not set")
+            return datagen.flow_from_directory(
+                self.opts.validation_dir,
+                target_size=self.opts.image_shape,
+                batch_size=self.opts.batch_size,
+            )
+        else:
+            if self.opts.training_dir is None:
+                raise TrainerError("training directory not set")
+            return datagen.flow_from_directory(
+                self.opts.training_dir,
+                target_size=self.opts.image_shape,
+                batch_size=self.opts.batch_size,
+            )
 
     def preprocess_input_fn(self):
         """Returns the correct function for preprocessing the data, based on the
