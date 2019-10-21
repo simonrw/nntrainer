@@ -1,6 +1,7 @@
 import pytest
 from unittest import mock
-from nntrainer.app import ModelTrainer, TrainingOptions
+from nntrainer.app import TrainingOptions
+from nntrainer.modeltrainer import ModelTrainer
 import tensorflow as tf
 
 
@@ -24,21 +25,6 @@ def opts(request):
     opts.loss_function = LOSS_FUNCTION
     opts.output_classes = CLASSES
     return opts
-
-
-# @pytest.fixture(scope="session")
-# def training_dir():
-#     return "/"
-
-
-# @pytest.fixture(scope="session")
-# def validation_dir():
-#     return "/"
-
-
-# @pytest.fixture(scope="session", params=["ResNet50", "VGG16"])
-# def model_cls(request):
-#     return getattr(tf.keras.applications, request.param)
 
 
 @pytest.fixture(scope="session")
