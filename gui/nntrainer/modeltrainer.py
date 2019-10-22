@@ -168,7 +168,7 @@ class ModelTrainer(object):
             self.opts.output_directory, f"{self.opts.output_name}_tb"
         )
         return tf.keras.callbacks.TensorBoard(
-            tensorboard_dir, batch_size=self.opts.batch_size
+            tensorboard_dir
         )
 
     @property
