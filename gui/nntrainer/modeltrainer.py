@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten
@@ -16,16 +17,35 @@ class ModelTrainer(object):
         self.opts = opts
 
     def run(self):
+        """Train a model on the datagenerators built"""
         model = self.build_model()
 
+        # Set up the data generators
         training_datagen = self.build_datagen(validation=False)
         training_dataflow = self.build_dataflow(training_datagen, validation=False)
 
         if self.opts.validation_dir:
             validation_datagen = self.build_datagen(validation=True)
-            validation_dataflow = self.build_dataflow(validation_datagen, validation=True)
+            validation_dataflow = self.build_dataflow(
+                validation_datagen, validation=True
+            )
         else:
             validation_dataflow = None
+
+        callbacks = self.build_callbacks(
+            include_validation=validation_dataflow is not None
+        )
+
+        args = dict(
+            generator=training_dataflow,
+            epochs=self.opts.training_epochs,
+            verbose=0,
+            callbacks=callbacks,
+        )
+        if validation_dataflow is not None:
+            args["validation_data"] = validation_dataflow
+
+        history = model.fit_generator(**args)
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
@@ -112,6 +132,44 @@ class ModelTrainer(object):
         }
 
         return fns[self.model_cls]
+
+    def build_callbacks(self, include_validation):
+
+        callbacks = [
+            self.build_model_checkpoint_callback(include_validation),
+            self.build_tensorboard_callback(),
+        ]
+
+        if self.opts.early_stopping:
+            callbacks.append(
+                tf.keras.callbacks.EarlyStoppingCallback(
+                    patience=self.opts.early_stopping.patience,
+                    min_delta=self.opts.early_stopping.minimum_delta,
+                )
+            )
+
+        return callbacks
+
+    def build_model_checkpoint_callback(self, include_validation):
+        checkpoint_filename = os.path.join(
+            self.opts.output_directory, f"{self.opts.output_name}_checkpoints.h5"
+        )
+        if include_validation:
+            checkpoint_metric = "val_loss"
+        else:
+            checkpoint_metric = "loss"
+
+        return tf.keras.callbacks.ModelCheckpoint(
+            checkpoint_filename, checkpoint_metric, verbose=0, save_best_only=True
+        )
+
+    def build_tensorboard_callback(self):
+        tensorboard_dir = os.path.join(
+            self.opts.output_directory, f"{self.opts.output_name}_tb"
+        )
+        return tf.keras.callbacks.TensorBoard(
+            tensorboard_dir, batch_size=self.opts.batch_size
+        )
 
     @property
     def model_cls(self):

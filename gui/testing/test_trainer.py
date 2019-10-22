@@ -48,7 +48,9 @@ def training_dir():
 
 
 @pytest.fixture(scope="session", params=["ResNet50", "VGG16"])
-def opts(request, training_dir):
+def opts(request, training_dir, tmp_path_factory):
+    output_dir = tmp_path_factory.mktemp("opts")
+
     opts = TrainingOptions()
     opts.architecture = request.param
     opts.image_shape = INPUT_SHAPE
@@ -62,6 +64,8 @@ def opts(request, training_dir):
     opts.rotation_angle = 20
     opts.training_dir = training_dir
     opts.batch_size = BATCH_SIZE
+    opts.output_directory = output_dir
+    opts.output_name = "modeltesting"
     return opts
 
 
@@ -126,4 +130,7 @@ def test_building_dataflow(training_dataflow):
 
 
 def test_run(trainer):
-    trainer.run()
+    with mock.patch.object(trainer, "build_model") as build_model:
+        trainer.run()
+
+    build_model.return_value.fit_generator.assert_called_once()
