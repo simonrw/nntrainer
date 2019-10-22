@@ -45,7 +45,7 @@ class ModelTrainer(object):
         if validation_dataflow is not None:
             args["validation_data"] = validation_dataflow
 
-        history = model.fit_generator(**args)
+        return model.fit_generator(**args)
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
@@ -142,7 +142,7 @@ class ModelTrainer(object):
 
         if self.opts.early_stopping:
             callbacks.append(
-                tf.keras.callbacks.EarlyStoppingCallback(
+                tf.keras.callbacks.EarlyStopping(
                     patience=self.opts.early_stopping.patience,
                     min_delta=self.opts.early_stopping.minimum_delta,
                 )
