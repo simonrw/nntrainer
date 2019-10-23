@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.callbacks import Callback
+from PyQt5.QtCore import QRunnable, pyqtSlot, pyqtSignal, QObject
 
 from .trainingoptions import TrainingOptions
 from .architectures import ARCHITECTURES
@@ -14,9 +15,9 @@ class TrainerError(Exception):
 
 
 class UiUpdateCallback(Callback):
-    def __init__(self, update_fn):
+    def __init__(self, update_signal):
         super().__init__()
-        self.update_fn = update_fn
+        self.update_signal = update_signal
 
         # Training values
         self.loss_history = []
@@ -30,7 +31,7 @@ class UiUpdateCallback(Callback):
 
         loss = logs["loss"]
         self.loss_history.append(loss)
-        self.update_fn(self.loss_history)
+        self.update_signal.emit(self.loss_history)
 
     def on_train_batch_end(self, batch, logs=None):
         pass
@@ -42,11 +43,21 @@ class UiUpdateCallback(Callback):
         pass
 
 
-class ModelTrainer(object):
-    def __init__(self, opts: TrainingOptions):
-        self.opts = opts
+class WorkerSignals(QObject):
+    update = pyqtSignal(object)
+    finish = pyqtSignal()
 
-    def run(self, update_fn=None, finish_callback=None):
+
+class ModelTrainer(QRunnable):
+
+    def __init__(self, opts: TrainingOptions):
+        QRunnable.__init__(self)
+
+        self.opts = opts
+        self.signals = WorkerSignals()
+
+    @pyqtSlot()
+    def run(self):
         try:
             """Train a model on the datagenerators built"""
             model = self.build_model()
@@ -65,7 +76,6 @@ class ModelTrainer(object):
 
             callbacks = self.build_callbacks(
                 include_validation=validation_dataflow is not None,
-                update_fn=update_fn,
             )
 
             args = dict(
@@ -79,8 +89,7 @@ class ModelTrainer(object):
 
             _history = model.fit_generator(**args)
         finally:
-            if finish_callback is not None:
-                finish_callback()
+            self.signals.finish.emit()
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
@@ -168,15 +177,13 @@ class ModelTrainer(object):
 
         return fns[self.model_cls]
 
-    def build_callbacks(self, include_validation, update_fn):
+    def build_callbacks(self, include_validation):
 
         callbacks = [
             self.build_model_checkpoint_callback(include_validation),
             self.build_tensorboard_callback(),
+            UiUpdateCallback(self.signals.update),
         ]
-
-        if update_fn is not None:
-            callbacks.append(UiUpdateCallback(update_fn))
 
         if self.opts.early_stopping:
             callbacks.append(

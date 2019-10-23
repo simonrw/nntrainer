@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 import os
 import threading
 import argparse
@@ -26,6 +26,8 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+
+        self.threadpool = QtCore.QThreadPool()
 
         # Thread handle for training process. There should only be one as each
         # training process takes up the whole computer for training.
@@ -174,19 +176,20 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
             )
             return
 
-        self.trainer_thread = threading.Thread(
-            target=lambda: ModelTrainer(opts).run(
-                update_fn=self.model_update_ui, finish_callback=self.thread_finished
-            )
-        )
-        self.trainer_thread.start()
+        self.trainer_thread = ModelTrainer(opts)
+        self.trainer_thread.signals.update.connect(self.model_update_ui)
+        self.trainer_thread.signals.finish.connect(self.thread_finished)
+        self.threadpool.start(self.trainer_thread)
+
+        # Indicate to the user that the training has started, and can be cancelled
+        self.trainButton.setText("Cancel training")
 
     def model_update_ui(self, msg):
         self.lossHistoryPlot.plot(msg)
 
     def thread_finished(self):
-        show_error_dialog("thread finished")
         self.trainer_thread = None
+        self.trainButton.setText("Train")
 
 
 def main():
