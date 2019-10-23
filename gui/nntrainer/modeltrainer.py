@@ -18,6 +18,9 @@ class UiUpdateCallback(Callback):
         super().__init__()
         self.update_fn = update_fn
 
+        # Training values
+        self.loss_history = []
+
     def on_train_begin(self, logs=None):
         self.update_fn("on_train_begin")
 
