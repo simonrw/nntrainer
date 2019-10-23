@@ -1,5 +1,7 @@
 # Neural Network Trainer
 
+**Very work in progress**
+
 Quickly and interactively train a neural network image classifier. Currently a PyQt5 GUI version has been developed.
 
 ## Key inputs required from the user
