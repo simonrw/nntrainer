@@ -19,19 +19,19 @@ Use PyQt to build a local GUI. This has the advantage of being runable from the 
 
 The model page lets the user configure the architecture to be used, the number of classes to predict, and the fully connected layers. All architectures are pre-trained on ImageNet.
 
-![Model page][.readme/images/model_page.png]
+![Model page](.readme/images/model_page.png)
 
 The training page is for setting up the data locations, as well as the image dimensions, and training parameters.
 
-![Training page][.readme/images/training_page.png]
+![Training page](.readme/images/training_page.png)
 
 Data augmentation can be configured with the augmentation page, including shifts, rotations and flips.
 
-![Augmentation page][.readme/images/augmentation_page.png]
+![Augmentation page](.readme/images/augmentation_page.png)
 
 The output page configures where the results are stored, and the unique name. A training checkpoint file is stored under `{name}_checkpoints.h5`, and the tensorboard logs are stored under `{name}_tb`. 
 
-![Output page][.readme/images/output_page.png]
+![Output page](.readme/images/output_page.png)
 
 **Results page**
 
