@@ -2,6 +2,7 @@ import os
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.callbacks import Callback
 
 from .trainingoptions import TrainingOptions
 from .architectures import ARCHITECTURES
@@ -12,40 +13,66 @@ class TrainerError(Exception):
         super().__init__(msg)
 
 
+class UiUpdateCallback(Callback):
+    def __init__(self, update_fn):
+        super().__init__()
+        self.update_fn = update_fn
+
+    def on_train_begin(self, logs=None):
+        self.update_fn("on_train_begin")
+
+    def on_epoch_end(self, epoch, logs=None):
+        self.update_fn(f"on_epoch_end (epoch={epoch}, logs={logs})")
+
+    def on_train_batch_end(self, batch, logs=None):
+        self.update_fn(f"on_train_batch_end (batch={batch}, logs={logs})")
+
+    def on_test_batch_end(self, batch, logs=None):
+        self.update_fn(f"on_test_batch_end (batch={batch}, logs={logs})")
+
+    def on_train_end(self, logs=None):
+        self.update_fn("on_train_end")
+
+
 class ModelTrainer(object):
     def __init__(self, opts: TrainingOptions):
         self.opts = opts
 
-    def run(self):
-        """Train a model on the datagenerators built"""
-        model = self.build_model()
+    def run(self, update_fn=None, finish_callback=None):
+        try:
+            """Train a model on the datagenerators built"""
+            model = self.build_model()
 
-        # Set up the data generators
-        training_datagen = self.build_datagen(validation=False)
-        training_dataflow = self.build_dataflow(training_datagen, validation=False)
+            # Set up the data generators
+            training_datagen = self.build_datagen(validation=False)
+            training_dataflow = self.build_dataflow(training_datagen, validation=False)
 
-        if self.opts.validation_dir:
-            validation_datagen = self.build_datagen(validation=True)
-            validation_dataflow = self.build_dataflow(
-                validation_datagen, validation=True
+            if self.opts.validation_dir:
+                validation_datagen = self.build_datagen(validation=True)
+                validation_dataflow = self.build_dataflow(
+                    validation_datagen, validation=True
+                )
+            else:
+                validation_dataflow = None
+
+            callbacks = self.build_callbacks(
+                include_validation=validation_dataflow is not None,
+                update_fn=update_fn,
             )
-        else:
-            validation_dataflow = None
 
-        callbacks = self.build_callbacks(
-            include_validation=validation_dataflow is not None
-        )
+            args = dict(
+                generator=training_dataflow,
+                epochs=self.opts.training_epochs,
+                verbose=0,
+                callbacks=callbacks,
+            )
+            if validation_dataflow is not None:
+                args["validation_data"] = validation_dataflow
 
-        args = dict(
-            generator=training_dataflow,
-            epochs=self.opts.training_epochs,
-            verbose=0,
-            callbacks=callbacks,
-        )
-        if validation_dataflow is not None:
-            args["validation_data"] = validation_dataflow
-
-        return model.fit_generator(**args)
+            _history = model.fit_generator(**args)
+        finally:
+            if finish_callback is not None:
+                finish_callback()
 
     def build_model(self):
         # Create the custom first layer, which has the dimensions of the data
@@ -133,12 +160,15 @@ class ModelTrainer(object):
 
         return fns[self.model_cls]
 
-    def build_callbacks(self, include_validation):
+    def build_callbacks(self, include_validation, update_fn):
 
         callbacks = [
             self.build_model_checkpoint_callback(include_validation),
             self.build_tensorboard_callback(),
         ]
+
+        if update_fn is not None:
+            callbacks.append(UiUpdateCallback(update_fn))
 
         if self.opts.early_stopping:
             callbacks.append(

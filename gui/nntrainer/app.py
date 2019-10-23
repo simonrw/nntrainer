@@ -1,10 +1,13 @@
 import sys
 from PyQt5 import QtWidgets, QtGui
 import os
+import threading
+import argparse
+import queue
 
 from .gui import nntrainer_ui, nntrainer_augmentation
 from .modeltrainer import ModelTrainer
-from .trainingoptions import TrainingOptions
+from .trainingoptions import TrainingOptions, EarlyStoppingOptions
 from .architectures import ARCHITECTURES
 
 LOSS_FUNCTIONS = ["categorical_crossentropy"]
@@ -23,6 +26,10 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
+
+        # Thread handle for training process. There should only be one as each
+        # training process takes up the whole computer for training.
+        self.trainer_thread = None
 
         # Internal state
         self.training_dir = None
@@ -80,23 +87,31 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
         self.set_output_dir(dirname)
 
     def set_training_dir(self, dirname):
+        dirname = os.path.realpath(dirname)
+
         self.training_dir = dirname
         self.trainingDirValue.setText(dirname)
 
     def set_validation_dir(self, dirname):
+        dirname = os.path.realpath(dirname)
+
         self.validation_dir = dirname
         self.validationDirValue.setText(dirname)
 
     def set_output_dir(self, dirname):
+        dirname = os.path.realpath(dirname)
+
         self.output_dir = dirname
         self.outputDirValue.setText(dirname)
 
-    def configure_augmentation(self):
-        augmentation_config = NNTrainerAugmentation.get_params(parent=self)
-        if augmentation_config is not None:
-            self.augmentation_config = augmentation_config
+    def set_name(self, name):
+        self.outputStub.setText(name)
 
     def run_training(self):
+        if self.trainer_thread is not None:
+            show_error_dialog("cannot start multiple training threads")
+            return
+
         validation_errors = []
 
         opts = TrainingOptions()
@@ -159,12 +174,50 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
             )
             return
 
-        trainer = ModelTrainer(opts).run()
-        # TODO: update the GUI with trainer outputs
+        self.trainer_thread = threading.Thread(
+            target=lambda: ModelTrainer(opts).run(
+                update_fn=self.model_update_ui, finish_callback=self.thread_finished
+            )
+        )
+        self.trainer_thread.start()
+
+    def model_update_ui(self, msg):
+        print(msg)
+
+    def thread_finished(self):
+        show_error_dialog("thread finished")
+        self.trainer_thread = None
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-t", "--training-dir", required=False, help="Training data directory"
+    )
+    parser.add_argument(
+        "-V", "--validation-dir", required=False, help="Validation data directory"
+    )
+    parser.add_argument(
+        "-n", "--name", required=False, help="Name of the training session"
+    )
+    parser.add_argument("-o", "--output-dir", required=False, help="Output directory")
+    args = parser.parse_args()
+
+    app = QtWidgets.QApplication([])
     trainer = NNTrainerApplication()
+
+    # Configure CLI options
+    if args.training_dir:
+        trainer.set_training_dir(args.training_dir)
+
+    if args.validation_dir:
+        trainer.set_validation_dir(args.validation_dir)
+
+    if args.output_dir:
+        trainer.set_output_dir(args.output_dir)
+
+    if args.name:
+        trainer.set_name(args.name)
+
     trainer.show()
     app.exec_()

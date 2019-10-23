@@ -8,7 +8,7 @@ main() {
     # Cats
     i=0
     for image in \
-        "https://en.wikipedia.org/wiki/Cat_intelligence#/media/File:An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg" \
+        "https://images.unsplash.com/photo-1529778873920-4da4926a72c2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=752&q=80" \
         "https://images.immediate.co.uk/production/volatile/sites/4/2018/08/iStock_000044061370_Medium-fa5f8aa.jpg?quality=90&crop=5px,17px,929px,400px&resize=940,404" \
         ; do
         for subdir in exampledata/train/cat exampledata/val/cat; do

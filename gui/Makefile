@@ -5,7 +5,7 @@ build: nntrainer/gui/nntrainer_ui.py nntrainer/gui/nntrainer_augmentation.py
 
 run:
 	$(MAKE) build
-	nntrainer
+	nntrainer --training-dir exampledata/train --output-dir exampledata/out --name foo --validation-dir exampledata/val
 
 debug:
 	$(MAKE) build
