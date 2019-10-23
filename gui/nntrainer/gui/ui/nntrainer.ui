@@ -697,7 +697,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_17">
         <item>
-         <widget class="PlotWidget" name="graphicsView"/>
+         <widget class="PlotWidget" name="lossHistoryPlot"/>
         </item>
        </layout>
       </widget>

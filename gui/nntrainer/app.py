@@ -182,7 +182,7 @@ class NNTrainerApplication(QtWidgets.QMainWindow, nntrainer_ui.Ui_MainWindow):
         self.trainer_thread.start()
 
     def model_update_ui(self, msg):
-        print(msg)
+        self.lossHistoryPlot.plot(msg)
 
     def thread_finished(self):
         show_error_dialog("thread finished")

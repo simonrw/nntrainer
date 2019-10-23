@@ -22,19 +22,24 @@ class UiUpdateCallback(Callback):
         self.loss_history = []
 
     def on_train_begin(self, logs=None):
-        self.update_fn("on_train_begin")
+        pass
 
     def on_epoch_end(self, epoch, logs=None):
-        self.update_fn(f"on_epoch_end (epoch={epoch}, logs={logs})")
+        if logs is None:
+            return
+
+        loss = logs["loss"]
+        self.loss_history.append(loss)
+        self.update_fn(self.loss_history)
 
     def on_train_batch_end(self, batch, logs=None):
-        self.update_fn(f"on_train_batch_end (batch={batch}, logs={logs})")
+        pass
 
     def on_test_batch_end(self, batch, logs=None):
-        self.update_fn(f"on_test_batch_end (batch={batch}, logs={logs})")
+        pass
 
     def on_train_end(self, logs=None):
-        self.update_fn("on_train_end")
+        pass
 
 
 class ModelTrainer(object):
